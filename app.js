@@ -32,6 +32,8 @@ dotenv.config({path:'./.env'});
  //define routes
  app.use('/', require('./routes/pages'))
  app.use('/auth', require('./routes/auth'));
+
+
  
   app.listen(8080, ()=>{
     console.log("server started on port 8080")
