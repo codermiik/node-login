@@ -1,29 +1,15 @@
-const mysql = require('mysql');
+const express = require('express');
+const db = require('../dbconfig');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs')
+const cookieParser = require('cookie-parser');
 
 
-
-const db=mysql.createConnection({
-    host: process.env.DATABASE_HOST,
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
-    database: process.env.DATABASE
- })
-
-
- //register page handler
+const app = express();
+app.use(cookieParser());
 
 exports.register=(req , res)=>{
     console.log(req.body);
-
-  /*  const name = req.body.name;
-    const email = req.body.email;
-    const password = req.body.password;
-    const passwordConfirm = req.body.passwordConfirm; */
-    
-
-         //or you can destructure
 
     const {name, email, password, passwordConfirm} =req.body;
 
@@ -62,7 +48,6 @@ exports.register=(req , res)=>{
 
 
 //login handler
-
 exports.login = (req, res) => {
   const { email, password } = req.body;
 
@@ -80,17 +65,16 @@ exports.login = (req, res) => {
     const user = results[0];
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    if (isPasswordValid) {
+       if (isPasswordValid) {
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
         expiresIn:"1h",
     
       });
         res.cookie('jwt', token, {
-       // expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES * 24 * 60 * 60 * 1000), // Cookie expiration time
-        httpOnly: true, // 
+        httpOnly: true, 
       });
 
-      res.render('./index'); 
+      res.redirect('/'); 
     } else {
       return res.render('login', {
         wrongDetails: 'Password is incorrect',
@@ -98,6 +82,42 @@ exports.login = (req, res) => {
     }
   });
 };
+
+/*
+exports.userProfile = (req, res) => {
+      
+    const token = req.cookies.jwt;
+ 
+  
+    if (!token) {
+        return res.redirect('/login');
+    }
+  
+      jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+      if (err) {
+        console.log(err);
+          return res.redirect('/login');
+      }
+
+      console.log('Decoded Token:', decodedToken);
+  
+      const userId = decodedToken.id;
+  
+      db.query('SELECT * FROM uesrs WHERE id = ?', [userId], (error, results) => {
+        if (error) {
+          console.log(error);
+          return res.redirect('/login');
+        }
+        
+        res.render('userProfile', {
+          user: results[0], // Assuming that the user information is in the first result
+        });
+      });
+    });
+  
+};
+*/
+
 
 
 
